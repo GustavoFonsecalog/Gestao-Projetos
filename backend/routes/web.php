@@ -48,6 +48,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/projects/{project}/tasks', [\App\Http\Controllers\TaskController::class, 'index']);
+    Route::post('/projects/{project}/tasks', [\App\Http\Controllers\TaskController::class, 'store']);
+    Route::put('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'update']);
+    Route::delete('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'destroy']);
+
+    Route::get('/tasks/{task}/subtasks', [\App\Http\Controllers\SubtaskController::class, 'index']);
+    Route::post('/tasks/{task}/subtasks', [\App\Http\Controllers\SubtaskController::class, 'store']);
+    Route::put('/subtasks/{id}', [\App\Http\Controllers\SubtaskController::class, 'update']);
+    Route::delete('/subtasks/{id}', [\App\Http\Controllers\SubtaskController::class, 'destroy']);
 });
 
 // Rotas públicas
