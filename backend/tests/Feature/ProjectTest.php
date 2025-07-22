@@ -57,7 +57,7 @@ class ProjectTest extends TestCase
             'client_name' => 'Novo Cliente',
             'phase' => 'Execução',
         ]);
-        $response->assertStatus(200);
+        $response->assertRedirect();
         $this->assertDatabaseHas('projects', [
             'id' => $projeto->id,
             'title' => 'Novo Título',
@@ -199,7 +199,7 @@ class ProjectTest extends TestCase
             'orcamento_real' => 4000,
             'users' => [],
         ]);
-        $response->assertStatus(200);
+        $response->assertRedirect();
         $this->assertDatabaseHas('projects', [
             'id' => $projeto->id,
             'title' => 'Editado',
