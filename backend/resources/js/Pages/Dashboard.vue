@@ -15,6 +15,7 @@ const emailLoading = ref(false);
 const emailError = ref('');
 const emailSuccess = ref('');
 const emailProjectId = ref(null);
+const duplicating = ref(false);
 
 function openSuggestionModal(projectId) {
     selectedProjectId.value = projectId;
@@ -39,7 +40,7 @@ function openMenu(id) {
 function closeMenu(id) {
     menuState[id] = false;
 }
-function handleArchive(project) {
+async function handleArchive(project) {
     fetch(`/projects/${project.id}/archive`, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content } })
         .then(r => r.json()).then(() => {
             // Remove o projeto da lista localmente
@@ -47,10 +48,29 @@ function handleArchive(project) {
         });
     closeMenu(project.id);
 }
-function handleDuplicate(project) {
-    fetch(`/projects/${project.id}/duplicate`, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content } })
-        .then(r => r.json()).then(() => window.location.reload());
-    closeMenu(project.id);
+async function handleDuplicate(project) {
+    duplicating.value = true;
+    try {
+        await fetch(`/projects/${project.id}/duplicate`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content
+            }
+        });
+        await fetchProjects();
+    } finally {
+        duplicating.value = false;
+        closeMenu(project.id);
+    }
+}
+async function fetchProjects() {
+    const res = await fetch('/projects', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (res.ok) {
+        projects.value = await res.json();
+    }
 }
 function handleDownloadPdf(project) {
     window.open(`/projects/${project.id}/pdf`, '_blank');
@@ -121,13 +141,12 @@ function getProgress(project) {
     }
     return Math.floor(Math.random() * 40) + 60;
 }
+function formatMoney(value) {
+    if (value === null || value === undefined || value === '') return '-';
+    return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
 
-onMounted(async () => {
-    const response = await fetch('/projects');
-    if (response.ok) {
-        projects.value = await response.json();
-    }
-});
+onMounted(fetchProjects);
 </script>
 
 <template>
@@ -175,7 +194,7 @@ onMounted(async () => {
                         </div>
                         <div class="flex justify-between text-xs text-gray-300 mt-2">
                             <span>Entrega: {{ formatDate(project.data_fim) }}</span>
-                            <span>Orçamento: R$ {{ project.orcamento_estimado || '-' }} / {{ project.orcamento_real || '-' }}</span>
+                            <span>Orçamento: {{ formatMoney(project.orcamento_estimado) }} / {{ formatMoney(project.orcamento_real) }}</span>
                         </div>
                         <div class="mt-4 flex gap-2">
                             <Link :href="`/projects/${project.id}/edit`" class="rounded-full bg-grass-light hover:bg-grass text-white px-4 py-1 text-sm font-semibold">Editar</Link>
@@ -210,6 +229,12 @@ onMounted(async () => {
                             <button @click="closeEmailModal" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
                             <button @click="sendEmail" :disabled="!emailTo || emailLoading" class="px-4 py-2 rounded bg-grass text-white font-bold hover:bg-grass-dark disabled:opacity-50">{{ emailLoading ? 'Enviando...' : 'Enviar' }}</button>
                         </div>
+                    </div>
+                </div>
+                <div v-if="duplicating" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg">
+                        <svg class="animate-spin h-8 w-8 text-grass mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                        <span class="text-grass font-bold">Duplicando projeto...</span>
                     </div>
                 </div>
     </AuthenticatedLayout>
