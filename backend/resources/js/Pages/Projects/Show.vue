@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { ref, onMounted } from 'vue';
+import TasksKanban from './TasksKanban.vue';
 
 const project = usePage().props.project;
 
@@ -50,6 +51,7 @@ async function submitSuggestion() {
     if (res.ok) {
         newSuggestion.value = '';
         await fetchSuggestions();
+        await fetchActivities();
     }
     submitting.value = false;
 }
@@ -72,6 +74,8 @@ async function fetchActivities() {
     loadingActivities.value = false;
 }
 onMounted(fetchActivities);
+
+const showKanban = ref(false);
 </script>
 <template>
     <Head title="Detalhes do Projeto" />
@@ -83,6 +87,11 @@ onMounted(fetchActivities);
             </div>
         </template>
         <div class="py-12">
+            <div class="mx-auto max-w-7xl px-4 mb-8 flex justify-end">
+                <button @click="showKanban = !showKanban" class="bg-grass text-white font-bold px-6 py-2 rounded hover:bg-grass-dark transition">
+                    {{ showKanban ? 'Ocultar Tarefas' : 'Ver Tarefas' }}
+                </button>
+            </div>
             <div class="mx-auto max-w-7xl px-4 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
                 <!-- Detalhes do Projeto -->
                 <div class="bg-white/95 rounded-2xl shadow-xl p-10 min-h-[500px] flex flex-col">
@@ -141,6 +150,7 @@ onMounted(fetchActivities);
                     </div>
                 </div>
             </div>
+            <TasksKanban v-if="showKanban" />
         </div>
     </AuthenticatedLayout>
 </template> 
