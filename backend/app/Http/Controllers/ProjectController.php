@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjectActionMail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\ProjectSuggestion;
+use App\Models\ProjectActivity;
 
 class ProjectController extends Controller
 {
@@ -55,6 +56,16 @@ class ProjectController extends Controller
         if (isset($data['users'])) {
             $project->users()->sync($data['users']);
         }
+        // Feed: registrar criação do projeto
+        ProjectActivity::create([
+            'project_id' => $project->id,
+            'user_id' => Auth::id(),
+            'type' => 'project_created',
+            'description' => 'Projeto criado',
+            'data' => [
+                'title' => $project->title,
+            ],
+        ]);
         // return response()->json($project->load('users'), 201);
         return redirect('/dashboard')->with('success', 'Projeto criado com sucesso!');
     }
@@ -78,9 +89,33 @@ class ProjectController extends Controller
     {
         $this->authorize('update', $project);
         $data = $request->validated();
+        $old = $project->replicate();
         $project->update($data);
         if (isset($data['users'])) {
             $project->users()->sync($data['users']);
+        }
+        // Feed: registrar mudanças relevantes
+        $changes = [];
+        foreach ([
+            'title' => 'Título',
+            'status' => 'Status',
+            'prioridade' => 'Prioridade',
+            'phase' => 'Fase',
+            'data_inicio' => 'Data de início',
+            'data_fim' => 'Data de fim',
+        ] as $field => $label) {
+            if ($old[$field] != $project[$field]) {
+                $changes[] = "$label alterado de '{$old[$field]}' para '{$project[$field]}'";
+            }
+        }
+        if ($changes) {
+            ProjectActivity::create([
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+                'type' => 'project_updated',
+                'description' => implode('; ', $changes),
+                'data' => $changes,
+            ]);
         }
         return redirect()->route('projects.show', $project->id)->with('success', 'Projeto atualizado com sucesso!');
     }
@@ -147,6 +182,14 @@ class ProjectController extends Controller
         $suggestion = $project->suggestions()->create([
             'user_id' => Auth::id(),
             'text' => $request->text,
+        ]);
+        // Feed: registrar sugestão
+        ProjectActivity::create([
+            'project_id' => $project->id,
+            'user_id' => Auth::id(),
+            'type' => 'suggestion',
+            'description' => 'Nova sugestão: ' . $request->text,
+            'data' => [ 'suggestion_id' => $suggestion->id ],
         ]);
         return response()->json($suggestion->load('user'));
     }

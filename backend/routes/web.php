@@ -40,6 +40,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/send-email', [\App\Http\Controllers\ProjectController::class, 'sendEmail'])->name('projects.sendEmail');
     Route::get('/projects/{project}/suggestions', [\App\Http\Controllers\ProjectController::class, 'suggestions'])->name('projects.suggestions');
     Route::post('/projects/{project}/suggestions', [\App\Http\Controllers\ProjectController::class, 'addSuggestion'])->name('projects.addSuggestion');
+    Route::get('/projects/{project}/activities', [\App\Http\Controllers\ProjectActivityController::class, 'index']);
+    Route::post('/projects/{project}/activities', [\App\Http\Controllers\ProjectActivityController::class, 'store']);
     Route::get('/users', function () {
         return User::select('id', 'name')->get();
     });
