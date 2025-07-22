@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjectActionMail;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\ProjectSuggestion;
 
 class ProjectController extends Controller
 {
@@ -64,7 +65,10 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         $this->authorize('view', $project);
-        return response()->json($project->load('users'));
+        $project->load('users');
+        return inertia('Projects/Show', [
+            'project' => $project
+        ]);
     }
 
     /**
@@ -78,7 +82,7 @@ class ProjectController extends Controller
         if (isset($data['users'])) {
             $project->users()->sync($data['users']);
         }
-        return response()->json($project->load('users'));
+        return redirect()->route('projects.show', $project->id)->with('success', 'Projeto atualizado com sucesso!');
     }
 
     /**
@@ -127,5 +131,23 @@ class ProjectController extends Controller
         }
         Mail::to($to)->send(new ProjectActionMail($project, $messageText));
         return response()->json(['message' => 'E-mail enviado com sucesso!']);
+    }
+
+    public function suggestions(Project $project)
+    {
+        $this->authorize('view', $project);
+        $suggestions = $project->suggestions()->with('user')->latest()->get();
+        return response()->json($suggestions);
+    }
+
+    public function addSuggestion(Request $request, Project $project)
+    {
+        $this->authorize('view', $project);
+        $request->validate(['text' => 'required|string']);
+        $suggestion = $project->suggestions()->create([
+            'user_id' => Auth::id(),
+            'text' => $request->text,
+        ]);
+        return response()->json($suggestion->load('user'));
     }
 }
