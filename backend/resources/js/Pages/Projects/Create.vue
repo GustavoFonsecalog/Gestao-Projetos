@@ -80,7 +80,7 @@ const submit = () => {
             </div>
         </template>
         <div class="py-8 flex justify-center min-h-[80vh] bg-[#232544]">
-            <div class="flex flex-col md:flex-row gap-8 w-full max-w-6xl">
+            <div class="flex flex-col md:flex-row gap-8 w-full max-w-7xl">
                 <form @submit.prevent="submit" class="flex-1 bg-white rounded-xl shadow-lg p-8 gap-y-6 flex flex-col">
                     <div>
                         <h3 class="text-lg font-bold text-grass mb-4 flex items-center gap-2">Informações do Projeto</h3>
@@ -123,35 +123,31 @@ const submit = () => {
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-grass mb-4 flex items-center gap-2">Período e Status</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="data_inicio" class="block text-gray-700 text-sm font-medium mb-1">Início</label>
-                                    <input id="data_inicio" type="date" v-model="form.data_inicio" class="w-full h-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base" />
-                                </div>
-                                <div>
-                                    <label for="data_fim" class="block text-gray-700 text-sm font-medium mb-1">Fim</label>
-                                    <input id="data_fim" type="date" v-model="form.data_fim" class="w-full h-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base" />
-                                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="flex flex-col">
+                                <label for="data_inicio" class="block text-gray-700 text-sm font-medium mb-1">Início</label>
+                                <input id="data_inicio" type="date" v-model="form.data_inicio" class="w-full h-12 rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base" />
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="status" class="block text-gray-700 text-sm font-medium mb-1">Status</label>
-                                    <select id="status" v-model="form.status" class="w-full h-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base">
-                                        <option value="em_andamento">Em andamento</option>
-                                        <option value="finalizado">Finalizado</option>
-                                        <option value="cancelado">Cancelado</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="prioridade" class="block text-gray-700 text-sm font-medium mb-1">Prioridade</label>
-                                    <select id="prioridade" v-model="form.prioridade" class="w-full h-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base">
-                                        <option value="baixa">Baixa</option>
-                                        <option value="media">Média</option>
-                                        <option value="alta">Alta</option>
-                                        <option value="urgente">Urgente</option>
-                                    </select>
-                                </div>
+                            <div class="flex flex-col">
+                                <label for="data_fim" class="block text-gray-700 text-sm font-medium mb-1">Fim</label>
+                                <input id="data_fim" type="date" v-model="form.data_fim" class="w-full h-12 rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base" />
+                            </div>
+                            <div class="flex flex-col">
+                                <label for="status" class="block text-gray-700 text-sm font-medium mb-1">Status</label>
+                                <select id="status" v-model="form.status" class="w-full h-12 rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base">
+                                    <option value="em_andamento">Em andamento</option>
+                                    <option value="finalizado">Finalizado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col">
+                                <label for="prioridade" class="block text-gray-700 text-sm font-medium mb-1">Prioridade</label>
+                                <select id="prioridade" v-model="form.prioridade" class="w-full h-12 rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-grass focus:outline-none px-4 text-base">
+                                    <option value="baixa">Baixa</option>
+                                    <option value="media">Média</option>
+                                    <option value="alta">Alta</option>
+                                    <option value="urgente">Urgente</option>
+                                </select>
                             </div>
                         </div>
                     </div>
