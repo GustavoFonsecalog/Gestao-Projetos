@@ -48,4 +48,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Rotas públicas
+Route::get('/sobre', function () {
+    return Inertia::render('Sobre');
+});
+Route::get('/funcionalidades', function () {
+    return Inertia::render('Funcionalidades');
+});
+
 require __DIR__.'/auth.php';

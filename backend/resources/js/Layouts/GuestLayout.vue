@@ -36,8 +36,8 @@ function toggleTheme() {
       </div>
       <div class="hidden md:flex flex-col justify-between items-center w-1/2 bg-gradient-to-br from-grass to-[#23264a] relative p-8">
         <nav class="flex w-full justify-end gap-4 text-sm font-medium mb-8 text-white">
-          <a href="#" class="hover:text-grass transition">Sobre</a>
-          <a href="#" class="hover:text-grass transition">Funcionalidades</a>
+          <Link href="/sobre" class="hover:text-grass transition">Sobre</Link>
+          <Link href="/funcionalidades" class="hover:text-grass transition">Funcionalidades</Link>
         </nav>
         <div class="relative z-10 text-center px-8 mt-16">
           <h1 class="text-5xl font-extrabold text-white mb-4 drop-shadow-lg">Bem-vindo.</h1>
