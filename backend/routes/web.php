@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/duplicate', [\App\Http\Controllers\ProjectController::class, 'duplicate'])->name('projects.duplicate');
     Route::get('/projects/{project}/pdf', [\App\Http\Controllers\ProjectController::class, 'downloadPdf'])->name('projects.pdf');
     Route::post('/projects/{project}/send-email', [\App\Http\Controllers\ProjectController::class, 'sendEmail'])->name('projects.sendEmail');
+    Route::get('/projects/{project}/suggestions', [\App\Http\Controllers\ProjectController::class, 'suggestions'])->name('projects.suggestions');
+    Route::post('/projects/{project}/suggestions', [\App\Http\Controllers\ProjectController::class, 'addSuggestion'])->name('projects.addSuggestion');
     Route::get('/users', function () {
         return User::select('id', 'name')->get();
     });

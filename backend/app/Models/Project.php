@@ -43,4 +43,9 @@ class Project extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function suggestions()
+    {
+        return $this->hasMany(ProjectSuggestion::class);
+    }
 }
