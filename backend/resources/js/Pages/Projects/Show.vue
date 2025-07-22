@@ -46,6 +46,7 @@ async function submitSuggestion() {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content
         },
+        credentials: 'include',
         body: JSON.stringify({ text: newSuggestion.value })
     });
     if (res.ok) {

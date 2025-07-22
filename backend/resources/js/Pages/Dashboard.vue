@@ -96,6 +96,7 @@ function sendEmail() {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content
         },
+        credentials: 'same-origin', // <--- ADICIONE ESTA LINHA
         body: JSON.stringify({ to: emailTo.value, message: emailMessage.value })
     })
         .then(async r => {
