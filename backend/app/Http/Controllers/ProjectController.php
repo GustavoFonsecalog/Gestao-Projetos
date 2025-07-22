@@ -22,11 +22,13 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
         $projects = Project::with('users')
-            ->where('user_id', $user->id)
-            ->orWhereHas('users', function ($q) use ($user) {
-                $q->where('users.id', $user->id);
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('users', function ($q2) use ($user) {
+                      $q2->where('users.id', $user->id);
+                  });
             })
-            ->where('active', true)
+            ->whereNull('deleted_at')
             ->get();
         return response()->json($projects);
     }
