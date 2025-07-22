@@ -11,6 +11,7 @@ class ProjectTest extends TestCase
 {
     use RefreshDatabase;
 
+    // Testa se um usuário autenticado consegue criar um projeto normalmente
     public function test_usuario_autenticado_pode_criar_projeto()
     {
         $user = User::factory()->create();
@@ -30,6 +31,7 @@ class ProjectTest extends TestCase
         ]);
     }
 
+    // Testa se o usuário só vê projetos próprios ou em que está alocado
     public function test_usuario_autenticado_ve_apenas_projetos_proprios_ou_alocado()
     {
         $user = User::factory()->create();
@@ -47,6 +49,7 @@ class ProjectTest extends TestCase
         $this->assertFalse($ids->contains($outroProjeto->id));
     }
 
+    // Testa se o usuário pode editar um projeto que ele mesmo criou
     public function test_usuario_autenticado_pode_editar_projeto_que_criou()
     {
         $user = User::factory()->create();
@@ -64,6 +67,7 @@ class ProjectTest extends TestCase
         ]);
     }
 
+    // Testa se o usuário não pode editar projeto de outro usuário
     public function test_usuario_autenticado_nao_pode_editar_projeto_de_outro()
     {
         $user = User::factory()->create();
@@ -76,6 +80,7 @@ class ProjectTest extends TestCase
         $response->assertStatus(403);
     }
 
+    // Testa se o usuário pode desativar (soft delete) um projeto que criou
     public function test_usuario_autenticado_pode_desativar_projeto_que_criou()
     {
         $user = User::factory()->create();
@@ -89,6 +94,7 @@ class ProjectTest extends TestCase
         ]);
     }
 
+    // Testa se o usuário não pode desativar projeto de outro usuário
     public function test_usuario_autenticado_nao_pode_desativar_projeto_de_outro()
     {
         $user = User::factory()->create();
@@ -99,6 +105,7 @@ class ProjectTest extends TestCase
         $response->assertStatus(403);
     }
 
+    // Testa criação de projeto preenchendo todos os campos opcionais e obrigatórios
     public function test_usuario_pode_criar_projeto_com_todos_os_campos()
     {
         $user = User::factory()->create();
@@ -129,6 +136,7 @@ class ProjectTest extends TestCase
         ]);
     }
 
+    // Testa se o usuário pode excluir (soft delete) um projeto
     public function test_usuario_pode_excluir_projeto_soft_delete()
     {
         $user = User::factory()->create();
@@ -139,6 +147,7 @@ class ProjectTest extends TestCase
         $this->assertSoftDeleted('projects', ['id' => $projeto->id]);
     }
 
+    // Testa duplicação de projeto
     public function test_usuario_pode_duplicar_projeto()
     {
         $user = User::factory()->create();
@@ -149,6 +158,7 @@ class ProjectTest extends TestCase
         $this->assertDatabaseHas('projects', ['title' => 'Original (Cópia)']);
     }
 
+    // Testa se o usuário pode baixar o PDF do projeto
     public function test_usuario_pode_baixar_pdf_do_projeto()
     {
         $user = User::factory()->create();
@@ -159,6 +169,7 @@ class ProjectTest extends TestCase
         $response->assertHeader('content-type', 'application/pdf');
     }
 
+    // Testa envio de e-mail com informações do projeto
     public function test_envio_de_email_do_projeto()
     {
         \Mail::fake();
@@ -173,6 +184,7 @@ class ProjectTest extends TestCase
         \Mail::assertSent(\App\Mail\ProjectActionMail::class);
     }
 
+    // Testa validação dos campos obrigatórios ao criar projeto
     public function test_validacao_campos_obrigatorios()
     {
         $user = User::factory()->create();
@@ -181,6 +193,7 @@ class ProjectTest extends TestCase
         $response->assertSessionHasErrors(['title', 'client_name', 'phase', 'status', 'prioridade']);
     }
 
+    // Testa edição de todos os campos do projeto
     public function test_usuario_pode_editar_todos_os_campos_do_projeto()
     {
         $user = User::factory()->create();
@@ -211,5 +224,39 @@ class ProjectTest extends TestCase
             'orcamento_estimado' => 5000,
             'orcamento_real' => 4000,
         ]);
+    }
+
+    // Testa todo o fluxo de tarefas e subtarefas: criar, editar, mover, concluir, excluir
+    public function test_usuario_pode_criar_editar_excluir_tarefa_e_subtarefa()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $projeto = Project::factory()->create(['user_id' => $user->id]);
+        $response = $this->post("/projects/{$projeto->id}/tasks", [
+            'title' => 'Tarefa Kanban',
+            'status' => 'a_fazer',
+            'prioridade' => 'media',
+        ]);
+        $response->assertStatus(201);
+        $taskId = $response->json('id');
+        $this->assertDatabaseHas('tasks', ['title' => 'Tarefa Kanban', 'project_id' => $projeto->id]);
+        $this->put("/tasks/{$taskId}", ['title' => 'Tarefa Editada', 'status' => 'em_andamento', 'prioridade' => 'alta'])
+            ->assertStatus(200);
+        $this->assertDatabaseHas('tasks', ['title' => 'Tarefa Editada', 'status' => 'em_andamento', 'prioridade' => 'alta']);
+        $this->put("/tasks/{$taskId}", ['status' => 'concluida'])->assertStatus(200);
+        $this->assertDatabaseHas('tasks', ['id' => $taskId, 'status' => 'concluida']);
+        $response = $this->post("/tasks/{$taskId}/subtasks", [
+            'title' => 'Subtarefa 1',
+            'status' => 'a_fazer',
+        ]);
+        $response->assertStatus(201);
+        $subId = $response->json('id');
+        $this->assertDatabaseHas('subtasks', ['title' => 'Subtarefa 1', 'task_id' => $taskId]);
+        $this->put("/subtasks/{$subId}", ['is_checked' => true])->assertStatus(200);
+        $this->assertDatabaseHas('subtasks', ['id' => $subId, 'is_checked' => 1]);
+        $this->delete("/subtasks/{$subId}")->assertStatus(200);
+        $this->assertDatabaseMissing('subtasks', ['id' => $subId]);
+        $this->delete("/tasks/{$taskId}")->assertStatus(200);
+        $this->assertDatabaseMissing('tasks', ['id' => $taskId]);
     }
 }
